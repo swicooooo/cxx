@@ -55,7 +55,7 @@ public:
 private:
     asio::io_context& io_context_;
     asio::strand<asio::io_context::executor_type>& strand_;
-    const std::string root="/home/sw/Documents/cxx_file/res";
+    const std::string root="/home/sw/Documents/cxx/res";
 
     asio::awaitable<void> handle_request(tcp::socket socket, const std::string& path, bool is_search) {
          std::string tem_path=path;
@@ -145,7 +145,7 @@ private:
 
     asio::awaitable<void> handle_upload(tcp::socket socket, const std::string& filename, const std::string& body) {
         try {
-            std::ofstream outfile("/home/sw/Documents/cxx_file/res/upload/" + filename, std::ios::binary);
+            std::ofstream outfile("/home/sw/Documents/cxx/res/upload/" + filename, std::ios::binary);
             outfile.write(body.data(), body.size());
             outfile.close();
 

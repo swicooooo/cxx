@@ -10,4 +10,4 @@ int main() {
     // } catch (std::exception& e) {
     //     std::printf("Exception: %s\n", e.what());
     // }
-}s
+}

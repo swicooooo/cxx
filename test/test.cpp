@@ -2,9 +2,10 @@
 #include <chrono>
 #include "ThreadPool.hpp"
 #include "CSPChannel.hpp"
-#include "Dispatcher.hpp"
+#include "atm/Dispatcher.hpp"
 #include <functional>
-#include "ATM.hpp"
+#include "atm/ATM.hpp"
+#include "file_transfer/AsyncServer.hpp"
 
 void testThreadPool(){
     int m=0;
@@ -119,7 +120,18 @@ void testATM(){
     t3.join();
 }
 
+void testAsyncServeer() {
+    try{
+        AsyncServer server(8080);
+        server.start();
+        std::printf("Start[]: ...\n");
+        server.join();
+    }catch(std::exception& e){
+
+    }
+}
+
 int main()
 {
-    testATM();
+    testAsyncServeer();
 }
