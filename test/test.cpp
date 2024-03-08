@@ -12,6 +12,7 @@
 #include "data_struct/SafeQueue.hpp"
 #include "data_struct/SafeMap.hpp"
 #include "data_struct/SafeList.hpp"
+#include "asio/Singleton.h"
 
 void testThreadPool(){
     int m=0;
@@ -307,7 +308,14 @@ void testSafeList(){
         });
     std::cout << "end for each print...." << std::endl;
 }
+class S: public Singleton<S>
+{};
+void testSingleton(){
+    auto s1=S::GetInstance();
+    auto s2=S::GetInstance();
+    std::cout << "start...." << s1.get() << "   " << s2.get() << std::endl;
+}
 int main()
 {
-    testSafeList();
+    testSingleton();
 }
