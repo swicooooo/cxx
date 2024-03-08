@@ -8,7 +8,7 @@ int main() {
     builder.RegisterService(&service);
 
     std::unique_ptr<grpc::Server> server(builder.BuildAndStart());
-    std::cout << "Server listening on " << grpc::server_address << std::endl; 
+    
     server->Wait();
 
     return 0;
