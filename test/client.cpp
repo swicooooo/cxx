@@ -7,7 +7,6 @@ int main(){
 
     std::shared_ptr<grpc::Channel> channel= grpc::CreateChannel("localhost:50051",grpc::InsecureChannelCredentials());
     std::unique_ptr<Database::Stub> stub(Database::NewStub(channel));
-
     UserRequest req;
     req.set_uid(123);
     UserInfo resp;

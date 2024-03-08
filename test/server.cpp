@@ -1,13 +1,15 @@
-#include "demo/Stickly.hpp"
+#include "grpc/DataBaseImpl.hpp"
+#include <grpcpp/grpcpp.h>
 
 int main() {
-    try {
-        asio::io_context io_context;
-        Server server(io_context, 8080);
-        io_context.run();
-    } catch (std::exception& e) {
-        std::cerr << e.what() << std::endl;
-    }
+    DatabaseImpl service;
+    grpc::ServerBuilder builder;
+    builder.AddListeningPort("127.0.0.1:50051",grpc::InsecureServerCredentials());
+    builder.RegisterService(&service);
+
+    std::unique_ptr<grpc::Server> server(builder.BuildAndStart());
+    std::cout << "Server listening on " << grpc::server_address << std::endl; 
+    server->Wait();
 
     return 0;
 }
