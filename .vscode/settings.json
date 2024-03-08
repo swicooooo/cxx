@@ -94,7 +94,10 @@
         "executor": "cpp",
         "io_context": "cpp",
         "netfwd": "cpp",
-        "*.inc": "cpp"
+        "*.inc": "cpp",
+        "charconv": "cpp",
+        "shared_mutex": "cpp",
+        "queue": "cpp"
     },
     "cmake.buildTask": true
 }

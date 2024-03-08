@@ -1,11 +1,17 @@
 #include <iostream>
 #include <chrono>
+#include <set>
 #include "ThreadPool.hpp"
 #include "CSPChannel.hpp"
 #include "atm/Dispatcher.hpp"
 #include <functional>
 #include "atm/ATM.hpp"
 #include "file_transfer/AsyncServer.hpp"
+#include "data_struct/SafeCircleQueue.hpp"
+#include "data_struct/SafeStack.hpp"
+#include "data_struct/SafeQueue.hpp"
+#include "data_struct/SafeMap.hpp"
+#include "data_struct/SafeList.hpp"
 
 void testThreadPool(){
     int m=0;
@@ -131,7 +137,177 @@ void testAsyncServeer() {
     }
 }
 
+void testSafeQueue() {
+    safequeue::SafeCircleQueue<int,5> queue;
+    queue.emplace(0);
+    std::thread t1([&](){
+        for (size_t i = 0; i < 5; i++)
+        {
+            auto res=queue.emplace(i);
+            if(!res){
+                std::cout << "error emplace" << std::endl;
+                break;
+            }
+        }
+    });
+
+    std::thread t2([&](){
+        for (size_t i = 0; i < 5; i++)
+            {
+                int c   ;
+                auto res=queue.pop(c);
+                if(!res){
+                    std::cout << "error pop" << std::endl;
+                    break;
+                }
+            } 
+    });
+    t1.join();
+    t2.join();
+
+}
+void testSafeStack(){
+    SafeStack<int> stack;
+    stack.push(0);
+    std::thread t1([&](){
+        for (size_t i = 0; i < 5; i++)
+        {
+            stack.push(i);
+        }
+    });
+
+    std::thread t2([&](){
+        for (size_t i = 0; i < 5; i++)
+        {
+            int c;
+            stack.wait_pop(c);
+            std::cout << "pop: " << c << std::endl;
+        } 
+    });
+    t1.join();
+    t2.join();
+}
+void testSafeQueueEnhance(){
+    safequeue::SafeQueueEnhance<int> queue;
+    queue.push(0);
+    std::cout << "push: 0" << std::endl;
+    std::thread t1([&](){
+        for (size_t i = 1; i < 5; i++)
+        {
+            queue.push(i);
+            std::cout << "push: " << i << std::endl;
+        }
+    });
+
+    std::thread t2([&](){
+        for (size_t i = 0; i < 5; i++)
+        {
+            int c;
+            queue.wait_pop(c);
+            std::cout << "pop: " << c << std::endl;
+        } 
+    });
+    
+    t1.join();
+    t2.join();
+}
+class MyClass
+{
+public:
+    MyClass(int i):_data(i){}
+    MyClass() = default;
+
+    friend std::ostream& operator << (std::ostream& os, const MyClass& mc){
+        os << mc._data;
+        return os;
+    }
+    int GetData(){return _data;}
+
+private:
+    int _data;
+};
+void testSafeMap(){
+    std::set<int> removeSet;
+    SafeMap<int, std::shared_ptr<MyClass>> map;
+
+    std::thread t1([&](){
+       for(int i=0;i<100;++i){
+            map.addOrUpdateFor(i,std::make_shared<MyClass>(i));
+       } 
+    });
+    std::thread t2([&](){
+         for(int i=0;i<100;){
+            auto value=map.valueFor(i,nullptr);
+            if(value){
+                map.removeFor(i);
+                removeSet.insert(i++);
+            }
+            std::this_thread::sleep_for(std::chrono::milliseconds(10));
+       } 
+    });
+    std::thread t3([&](){
+         for(int i=100;i<200;++i){
+            map.addOrUpdateFor(i,std::make_shared<MyClass>(i));
+       } 
+    });
+    t1.join();
+    t2.join();
+    t3.join();
+
+    for(auto& i: removeSet)
+         std::cout << "remove data is " << i << std::endl;
+    for(auto& i: map.getMap())
+        std::cout << "copy data is " << *(i.second) << std::endl;
+}
+
+void testSafeList(){
+    SafeList<MyClass> list;
+    std::set<int> removeSet;
+    std::thread t1([&](){
+          for (int i = 0; i < 20000; i++)
+            {
+                MyClass mc(i);
+                list.pushFront(mc);
+                std::cout << "push front " << i << " success" << std::endl;
+            }
+    });
+    std::thread t2([&](){
+        for (int i = 2000; i < 40000; i++)
+            {
+                MyClass mc(i);
+                list.pushBack(mc);
+                std::cout << "push back " << i << " success" << std::endl;
+            }
+    });
+
+    std::thread t3([&](){
+         for(int i = 0; i < 40000; )
+            {
+                bool rmv_res = list.removeFirstIf([&](MyClass& mc)
+                    {
+                        return mc.GetData() == i;
+                    });
+
+                if(!rmv_res)
+                {
+                    std::this_thread::sleep_for(std::chrono::milliseconds(10));
+                    continue;
+                }
+                i++;
+            }
+    });
+
+    t1.join();
+    t2.join();
+    t3.join();
+    std::cout << "begin for each print...." << std::endl;
+    list.forEach([](MyClass& mc)
+        {
+            std::cout << "for each print " << mc << std::endl;
+        });
+    std::cout << "end for each print...." << std::endl;
+}
 int main()
 {
-    testAsyncServeer();
+    testSafeList();
 }

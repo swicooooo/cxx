@@ -1,0 +1,14 @@
+syntax = "proto3";
+
+service Database {
+  rpc GetUserInfo (UserRequest) returns (UserInfo) {}
+}
+
+message UserRequest {
+  string uid = 1;
+}
+
+message UserInfo {
+  string name = 1;
+  double balance = 2;
+}
