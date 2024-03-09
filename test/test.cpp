@@ -13,6 +13,7 @@
 #include "data_struct/SafeMap.hpp"
 #include "data_struct/SafeList.hpp"
 #include "asio/Singleton.h"
+#include "AsioThreadPool.hpp"
 
 void testThreadPool(){
     int m=0;
@@ -315,7 +316,24 @@ void testSingleton(){
     auto s2=S::GetInstance();
     std::cout << "start...." << s1.get() << "   " << s2.get() << std::endl;
 }
+void work(asio::io_context& io_context, int id){
+     asio::dispatch(io_context, [id]() {
+        std::cout << "Worker " << id << " started on thread " << std::this_thread::get_id() << std::endl;
+        std::this_thread::sleep_for(std::chrono::seconds(2));
+        std::cout << "Worker " << id << " finished on thread " << std::this_thread::get_id() << std::endl;
+    });
+}
+void testAsioTP(){
+    auto pool=AsioThreadPool::GetInstance();
+    for (int i = 0; i < 8; ++i) {
+        auto& ioc=pool->getIoContext();
+        work(ioc, i);
+    }
+    std::this_thread::sleep_for(std::chrono::seconds(5));
+    work(pool->getIoContext(), 8);
+    pool->stop();
+}
 int main()
 {
-    testSingleton();
+    testAsioTP();
 }
