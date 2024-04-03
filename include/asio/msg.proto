@@ -1,6 +1,0 @@
-syntax = "proto3";
-
-message NetMessage {
-    int32 msg_id = 1;
-    bytes data = 3;
-}

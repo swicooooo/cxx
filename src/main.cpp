@@ -1,13 +1,16 @@
-#include "file_transfer/AsyncServer.hpp"
+﻿#include <iostream>
+#include "asio/CServer.h"
+using namespace std;
 
-int main() {
-    // try {
-    //     uint16_t port = 8080;
-    //     AsyncServer server(port);
-    //     server.start();
-    //     std::printf("Start[]: ...\n");
-    //     server.join();
-    // } catch (std::exception& e) {
-    //     std::printf("Exception: %s\n", e.what());
-    // }
+int main()
+{
+    try {
+        boost::asio::io_context  io_context;
+        CServer s(io_context, 10086);
+        io_context.run();
+    }
+    catch(std::exception & e){
+        std::cerr << "Exception: " << e.what() <<  endl;
+    }
+    boost::asio::io_context io_context;
 }

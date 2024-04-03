@@ -14,6 +14,7 @@
 #include "data_struct/SafeList.hpp"
 #include "asio/Singleton.h"
 #include "AsioThreadPool.hpp"
+#include "asio/CServer.h"
 
 void testThreadPool(){
     int m=0;
@@ -333,7 +334,13 @@ void testAsioTP(){
     work(pool->getIoContext(), 8);
     pool->stop();
 }
+
+void testServer(){
+    asio::io_context ioc;
+    CServer s(ioc,1000);
+
+}
 int main()
 {
-    testAsioTP();
+    testServer();
 }
